@@ -30,4 +30,24 @@ julia> @btime InplaceQR.qrfact!($A, $qrb);
 
 julia> @btime qrfact!($A);
   763.624 μs (11 allocations: 6.73 KiB)
+
+julia> A = rand(300000000,3);
+
+julia> qrb = InplaceQR.QRBuffers(A);
+
+julia> @time InplaceQR.qrfact!(A, qrb);
+  7.305407 seconds (6 allocations: 224 bytes)
+
+julia> @time qrfact!(A);
+  4.440609 seconds (15 allocations: 720 bytes)
+
+julia> A = rand(300000,300);
+
+julia> qrb = InplaceQR.QRBuffers(A);
+
+julia> @time InplaceQR.qrfact!(A, qrb);
+ 26.846153 seconds (6 allocations: 224 bytes)
+
+julia> @time qrfact!(A);
+  3.338390 seconds (17 allocations: 169.297 KiB)
 ```
