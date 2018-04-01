@@ -2,26 +2,30 @@ function house!(h, j, X, k)
     T = eltype(h)
     n = size(X,1)
     σ = zero(T)
-    for i in j+1:n
+    @inbounds @simd for i in j+1:n
         σ += X[i,k]^2
     end
-    h[j] = one(T)
-    for i in j+1:n
-        h[i] = X[i,k]
+    @inbounds begin
+        h[j] = one(T)
+        @simd for i in j+1:n
+            h[i] = X[i,k]
+        end
     end
     if σ == zero(T)
         β = zero(T)
     else
-        μ = sqrt(X[j,k]^2 + σ)
-        if X[j,k] <= zero(T)
-            h[j] = X[j,k] - μ
-        else
-            h[j] = -σ/(X[j,k] + μ)
-        end
-        β = 2*(h[j]^2) / (σ + h[j]^2)
-        d = h[j]
-        for i in j:n
-            h[i] /= d
+        @inbounds begin
+            μ = sqrt(X[j,k]^2 + σ)
+            if X[j,k] <= zero(T)
+                h[j] = X[j,k] - μ
+            else
+                h[j] = -σ/(X[j,k] + μ)
+            end
+            β = 2*(h[j]^2) / (σ + h[j]^2)
+            d = h[j]
+            @simd for i in j:n
+                h[i] /= d
+            end
         end
     end
     β
@@ -37,12 +41,14 @@ A: Has the Householder vectors on the lower triangle
 function accumulate!(Q, A, β)
     T = eltype(Q)
     m, n = size(Q)
-    Q .= zero(T)
-    for i in 1:n
-        Q[i,i] = one(T)
+    @inbounds begin
+        Q .= zero(T)
+        @simd for i in 1:n
+            Q[i,i] = one(T)
+        end
     end
-    for j in n:-1:1
-        for t in j:n
+    @inbounds for j in n:-1:1
+        @simd for t in j:n
             dp = Q[j,t]
             for i in j+1:m
                 dp += A[i,j]*Q[i,t]
@@ -57,14 +63,14 @@ function accumulate!(Q, A, β)
 end
 
 """
-getR(R, A)
+getR!(R, A)
 
 Copies the right triangular part of A into the right triangular part of R.
 """
 function getR!(R, A)
     T = eltype(R)
     m, n = size(A)
-    for j in 1:n
+    @inbounds @simd for j in 1:n
         for i in 1:j
             R[i,j] = A[i,j]
         end
@@ -81,9 +87,9 @@ h: Empty buffer for in-place operations
 """
 function qrfact!(A, β, h=zeros(size(A,1)))
     m, n = size(A)
-    for j in 1:n
+    @inbounds for j in 1:n
         β[j] = house!(h, j, A, j)
-        for k in j:n
+        @simd for k in j:n
             dp = A[j,k]
             for i in j+1:m
                 dp += h[i]*A[i,k]
@@ -93,7 +99,7 @@ function qrfact!(A, β, h=zeros(size(A,1)))
             end
         end
         if j < m
-            for k in 1:(m-j)
+            @simd for k in 1:(m-j)
                 A[k+j,j] = h[k+j]
             end
         end
