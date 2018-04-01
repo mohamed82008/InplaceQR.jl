@@ -1,8 +1,10 @@
 function house!(h, j, X, k)
     T = eltype(h)
     n = size(X,1)
-    σ = mapreduce((i)->(X[i,k]^2), +, j+1:n)
-    h .= zero(T)
+    σ = zero(T)
+    for i in j+1:n
+        σ += X[i,k]^2
+    end
     h[j] = one(T)
     for i in j+1:n
         h[i] = X[i,k]
@@ -41,7 +43,10 @@ function accumulate!(Q, A, β)
     end
     for j in n:-1:1
         for t in j:n
-            dp = mapreduce((i)->(A[i,j]*Q[i,t]), +, j+1:m) + Q[j,t]
+            dp = Q[j,t]
+            for i in j+1:m
+                dp += A[i,j]*Q[i,t]
+            end
             Q[j,t] -= β[j]*dp
             for i in j+1:m
                 Q[i,t] -= β[j]*dp*A[i,j]
@@ -79,7 +84,10 @@ function qrfact!(A, β, h=zeros(size(A,1)))
     for j in 1:n
         β[j] = house!(h, j, A, j)
         for k in j:n
-            dp = mapreduce((i)->(h[i]*A[i,k]), +, j:m)
+            dp = A[j,k]
+            for i in j+1:m
+                dp += h[i]*A[i,k]
+            end
             for l in j:m
                 A[l,k] -= (β[j] * dp) * h[l]
             end
