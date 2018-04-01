@@ -12,25 +12,25 @@ struct QRBuffers{TB,TH}
     β::TB
     h::TH
 end
-QRBuffers(A) = QRBuffers(zeros(min(size(A)...)), zeros(size(A,1)))
+QRBuffers(A) = QRBuffers(zeros(eltype(A), min(size(A)...)), zeros(eltype(A), size(A,1)))
 struct QRCompact{T,S}
     A::T
     β::S
 end
-QRCompact(A) = QRCompact(A, zeros(min(size(A)...)))
+QRCompact(A) = QRCompact(A, zeros(eltype(A), min(size(A)...)))
 
 function qrfact!(A, qrb::QRBuffers=QRBuffers(A))
     qrfact!(A, qrb.β, qrb.h)
     QRCompact(A, qrb.β)
 end
-function qrfact!(qrc::QRCompact, h=zeros(size(qrc.A,1)))
+function qrfact!(qrc::QRCompact, h=zeros(eltype(qrc.A), size(qrc.A,1)))
     qrfact!(qrc.A, qrc.β, h)
     qrc
 end
 
 function QR(A, ::Type{Void})
     m, n = size(A)
-    qr = QR(similar(A), zeros(min(m,n), n))
+    qr = QR(similar(A), zeros(eltype(A), min(m,n), n))
     qr
 end
 function QR!(qr::QR, qrc::QRCompact)
@@ -40,7 +40,7 @@ function QR!(qr::QR, qrc::QRCompact)
 end
 function QR(qrc::QRCompact)
     m, n = size(qrc.A)
-    qr = QR(similar(qrc.A), zeros(min(m,n), n))
+    qr = QR(similar(qrc.A), zeros(eltype(qrc.A), min(m,n), n))
     QR!(qr, qrc)
     qr
 end
@@ -61,7 +61,7 @@ function RnoQ!(rnoq::RnoQ, qrc::QRCompact)
 end
 function RnoQ(qrc::QRCompact)
     m, n = size(qrc.A)
-    rnoq = RnoQ(zeros(min(m,n), n))
+    rnoq = RnoQ(zeros(eltype(qrc.A), min(m,n), n))
     RnoQ!(rnoq, qrc)
     rnoq
 end

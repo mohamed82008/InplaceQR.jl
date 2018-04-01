@@ -79,13 +79,13 @@ function getR!(R, A)
 end
 
 """
-qrfact!(A, β, h=zeros(size(A,1)))
+qrfact!(A, β, h=zeros(eltype(A), size(A,1)))
 
 A: Matrix to be QR factorized, returned by the function
 β: Empty buffer to store the Householder coefficients, returned by the function
 h: Empty buffer for in-place operations
 """
-function qrfact!(A, β, h=zeros(size(A,1)))
+function qrfact!(A, β, h=zeros(eltype(A), size(A,1)))
     m, n = size(A)
     @inbounds for j in 1:n
         β[j] = house!(h, j, A, j)
