@@ -10,7 +10,7 @@
 
 julia> using InplaceQR
 
-julia> A = rand(3,2);
+julia> A = rand(3000,20);
 
 julia> qrb = InplaceQR.QRBuffers(A);
 
@@ -23,10 +23,11 @@ julia> InplaceQR.QR!(qr, qrc);
 julia> qr.Q * qr.R ≈ A
 true
 
-julia> B = copy(A);
-
 julia> using BenchmarkTools
 
-julia> @btime InplaceQR.qrfact!(B, qrb);
-  2.310 μs (93 allocations: 1.56 KiB)
+julia> @btime InplaceQR.qrfact!($A, $qrb);
+  1.007 ms (2 allocations: 64 bytes)
+
+julia> @btime qrfact!($A);
+  763.624 μs (11 allocations: 6.73 KiB)
 ```
