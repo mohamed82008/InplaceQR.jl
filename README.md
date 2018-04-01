@@ -26,7 +26,7 @@ true
 julia> using BenchmarkTools
 
 julia> @btime InplaceQR.qrfact!($A, $qrb);
-  1.007 ms (2 allocations: 64 bytes)
+  915.327 μs (2 allocations: 64 bytes)
 
 julia> @btime qrfact!($A);
   763.624 μs (11 allocations: 6.73 KiB)
@@ -50,4 +50,3 @@ julia> @time InplaceQR.qrfact!(A, qrb);
 
 julia> @time qrfact!(A);
   3.338390 seconds (17 allocations: 169.297 KiB)
-```
